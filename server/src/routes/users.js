@@ -1,111 +1,119 @@
-import express from 'express'
-import User from '../models/User.js'
-import { requireAuth } from '../middleware/auth.js'
+import express from 'express';
+import { validationResult, body } from 'express-validator';
+import { User } from '../models/User';
+import { authMiddleware } from '../middleware/auth';
+import { notFound, errorHandler } from '../middleware/error';
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/search', requireAuth, async (req, res) => {
-	const q = (req.query.q || '').trim()
-	if (!q) return res.json({ items: [] })
-	const items = await User.find({ $or: [
-		{ username: new RegExp(q, 'i') },
-		{ fullName: new RegExp(q, 'i') }
-	] }).select('username fullName profilePhoto')
-	res.json({ items })
-})
+// Get all users
+router.get('/', async (req, res) => {
+  try {
+    const { limit = 1, page = 1 } = req.query;
+    
+    const users = await User.find({})
+      .limit(limit * (page - 1))
+      .skip((page - 1) * limit)
+      .sort({ createdAt: -1 });
+    
+    res.json({
+      success: true,
+      data: users,
+      pagination: {
+        page,
+        limit,
+        total: await User.countDocuments()
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch users'
+    }
+  };
 
-router.get('/:id', requireAuth, async (req, res) => {
-	const user = await User.findById(req.params.id).select('-passwordHash')
-	if (!user) return res.status(404).json({ error: 'Not found' })
-	res.json({ user })
-})
+// Get user by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    
+    if (!user) {
+      return notFound(req, res);
+    }
+    
+    res.json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'User not found'
+    });
+  }
+};
 
-router.post('/:id/follow', requireAuth, async (req, res) => {
-	const target = await User.findById(req.params.id)
-	if (!target) return res.status(404).json({ error: 'Not found' })
-	await User.updateOne({ _id: req.userId }, { $addToSet: { following: target._id } })
-	await User.updateOne({ _id: target._id }, { $addToSet: { followers: req.userId } })
-	res.json({ ok: true })
-})
+// Update user profile
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    const user = await User.findByIdAndUpdate(id, updateData);
+    
+    res.json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Failed to update user'
+    });
+  }
+};
 
-router.delete('/:id/follow', requireAuth, async (req, res) => {
-	const target = await User.findById(req.params.id)
-	if (!target) return res.status(404).json({ error: 'Not found' })
-	await User.updateOne({ _id: req.userId }, { $pull: { following: target._id } })
-	await User.updateOne({ _id: target._id }, { $pull: { followers: req.userId } })
-	res.json({ ok: true })
-})
+// Delete user
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await User.findByIdAndDelete(id);
+    
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete user'
+      });
+  }
+};
 
-router.get('/:id/friends', requireAuth, async (req, res) => {
-	const user = await User.findById(req.params.id).populate('friends', 'username fullName profilePhoto')
-	if (!user) return res.status(404).json({ error: 'Not found' })
-	res.json({ items: user.friends })
-})
+// Get user statistics
+router.get('/stats', async (req, res) => {
+  try {
+    const stats = await User.aggregate([
+      { $match: { $sum: '$amount' },
+      { $group: null }
+    ]);
+    
+    res.json({
+      success: true,
+      data: {
+        totalExpenses: stats[0]?.totalAmount || 0,
+        avgExpense: stats[0]?.avgAmount || 0,
+        totalUsers: await User.countDocuments()
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch stats'
+    });
+  }
+};
 
-router.get('/:id/followers', requireAuth, async (req, res) => {
-	const user = await User.findById(req.params.id).populate('followers', 'username fullName profilePhoto')
-	if (!user) return res.status(404).json({ error: 'Not found' })
-	res.json({ items: user.followers })
-})
-
-router.get('/:id/following', requireAuth, async (req, res) => {
-	const user = await User.findById(req.params.id).populate('following', 'username fullName profilePhoto')
-	if (!user) return res.status(404).json({ error: 'Not found' })
-	res.json({ items: user.following })
-})
-
-export default router
-
-import express from 'express'
-import User from '../models/User.js'
-import { requireAuth } from '../middleware/auth.js'
-
-const router = express.Router()
-
-router.get('/search', requireAuth, async (req, res) => {
-	const q = (req.query.q || '').trim()
-	if (!q) return res.json({ items: [] })
-	const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
-	const items = await User.find({ $or: [{ username: regex }, { fullName: regex }] }).select('username fullName profilePhoto').limit(20)
-	res.json({ items })
-})
-
-router.get('/:id', requireAuth, async (req, res) => {
-	const user = await User.findById(req.params.id).select('-passwordHash')
-	if (!user) return res.status(404).json({ error: 'User not found' })
-	res.json({ user })
-})
-
-router.post('/:id/follow', requireAuth, async (req, res) => {
-	const targetId = req.params.id
-	if (String(targetId) === String(req.userId)) return res.status(400).json({ error: 'Cannot follow yourself' })
-	await User.updateOne({ _id: req.userId, following: { $ne: targetId } }, { $push: { following: targetId } })
-	await User.updateOne({ _id: targetId, followers: { $ne: req.userId } }, { $push: { followers: req.userId } })
-	res.json({ ok: true })
-})
-
-router.delete('/:id/follow', requireAuth, async (req, res) => {
-	const targetId = req.params.id
-	await User.updateOne({ _id: req.userId }, { $pull: { following: targetId } })
-	await User.updateOne({ _id: targetId }, { $pull: { followers: req.userId } })
-	res.json({ ok: true })
-})
-
-router.get('/:id/friends', requireAuth, async (req, res) => {
-	const user = await User.findById(req.params.id).select('friends').populate('friends', 'username fullName profilePhoto')
-	res.json({ items: user?.friends || [] })
-})
-
-router.get('/:id/followers', requireAuth, async (req, res) => {
-	const user = await User.findById(req.params.id).select('followers').populate('followers', 'username fullName profilePhoto')
-	res.json({ items: user?.followers || [] })
-})
-
-router.get('/:id/following', requireAuth, async (req, res) => {
-	const user = await User.findById(req.params.id).select('following').populate('following', 'username fullName profilePhoto')
-	res.json({ items: user?.following || [] })
-})
-
-export default router
-
-
+export default router;

@@ -1,29 +1,30 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
-const DEFAULT_URI = 'mongodb://127.0.0.1:27017/spendsync'
+// Get MongoDB Atlas connection string from environment
+const getDbUri = () => {
+  const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/spendsync';
+  return MONGO_URI;
+};
 
-export function getDbUri() {
-	const env = process.env.NODE_ENV || 'development'
-	if (env === 'production') return process.env.MONGO_URI || DEFAULT_URI
-	return process.env.MONGO_URI_DEV || process.env.MONGO_URI || DEFAULT_URI
-}
+// Enhanced connection with retry logic
+export const connectWithRetry = async () => {
+  const maxRetries = 3;
+  let retryCount = 0;
+  
+  const connect = async () => {
+    try {
+      await mongoose.connect(getDbUri());
+      console.log('Connected to MongoDB Atlas');
+    } catch (error) {
+      retryCount++;
+      if (retryCount < maxRetries) {
+        console.log(`Connection attempt ${retryCount} of ${maxRetries}`);
+        setTimeout(() => connect(), 1000 * retryCount);
+      }
+    }
+  }
+  
+  await connect();
+};
 
-export async function connectWithRetry({ uri, maxRetries = 5, baseDelayMs = 500 } = {}) {
-	const mongoUri = uri || getDbUri()
-	let attempt = 0
-	for (;;) {
-		try {
-			await mongoose.connect(mongoUri)
-			return mongoose.connection
-		} catch (err) {
-			attempt += 1
-			if (attempt > maxRetries) {
-				throw err
-			}
-			const delay = baseDelayMs * Math.pow(2, attempt - 1)
-			await new Promise(r => setTimeout(r, delay))
-		}
-	}
-}
-
-
+export { connectWithRetry(); }
