@@ -12,10 +12,14 @@ const Navbar = () => {
   const handleGetStarted = () => {
     navigate('/signup');
   };
+    const handleHome = () => {
+    navigate('/');
+  };
 
   return (
     <nav className="flex justify-between items-center px-6 py-4 md:px-12 lg:px-16">
-      <div className="flex items-center space-x-2">
+      
+      <div onClick={handleHome} className="flex items-center   cursor-pointer space-x-2 hover:opacity-80 transition-opacity">
         <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
           <FaDollarSign className="text-white text-xl" />
         </div>

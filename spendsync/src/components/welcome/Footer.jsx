@@ -12,7 +12,7 @@ const Footer = () => {
           <span className="text-lg font-bold">SpendSync</span>
         </div>
         <p className="text-gray-400 text-sm">
-          © 2023 SpendSync. All rights reserved.
+          © 2025 SpendSync. All rights reserved.
         </p>
       </div>
     </footer>

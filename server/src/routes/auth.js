@@ -2,7 +2,6 @@ import express from 'express';
 import { validationResult, body } from 'express-validator';
 import { authController } from '../controllers/authController';
 import { authMiddleware } from '../middleware/auth';
-import { body } from 'express-validator';
 
 const router = express.Router();
 
@@ -14,21 +13,19 @@ router.post('/register', [
   body('fullName').notEmpty().withMessage('Full name is required'),
   body('country').notEmpty().withMessage('Country is required'),
   body('currency').optional().isIn(['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CNY', 'INR', 'TND']),
-  body('profilePhoto').optional(),
-  ], 
-  authMiddleware,
+  body('profilePhoto').optional()
+], 
   authController.register
-]);
+);
 
 // Login user
 router.post('/login', [
   body('email').isEmail().withMessage('Please include @ in your email'),
   body('password').exists().withMessage('Password is required'),
-  body('rememberMe').optional().optional(),
-  ], 
-  authMiddleware,
+  body('rememberMe').optional()
+], 
   authController.login
-]);
+);
 
 // Google OAuth
 router.post('/google', authController.googleLogin);

@@ -8,6 +8,9 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import AuthNavbar from "./components/navbar/AuthNavbar";
 import Navbar from "./components/welcome/Navbar";
 import Footer from "./components/welcome/Footer";
+import Feed from "./pages/Feed/Feed";
+import Profile from "./pages/Profile/Profile";
+
 
 function App() {
 return (
@@ -19,6 +22,8 @@ return (
 <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
 <Route path="/signup" element={<AuthLayout><SignUp /></AuthLayout>} />
 <Route path="/dashboard" element={<DashboardLayout />} />
+<Route path="/feed" element={<Feed /> }/>
+<Route path="/profile" element={<Profile />} />
 <Route path="*" element={<Navigate to="/" replace />} />
 </Routes>
 </div>

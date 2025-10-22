@@ -4,7 +4,10 @@ import {
   getExpenses, 
   addExpense, 
   updateExpense, 
-  deleteExpense 
+  deleteExpense,
+  likeExpense,
+  commentOnExpense,
+  getExpenseComments
 } from '../services/expenseService';
 import { authMiddleware } from '../middleware/auth';
 import { notFound, errorHandler } from '../middleware/error';
@@ -13,26 +16,33 @@ const router = express.Router();
 
 // Get all expenses
 router.get('/', async (req, res) => {
-  const { startDate, endDate, category, limit = 10, page = 1 } = req.query;
-  
-  const filter = {};
-  
-  if (startDate) filter.startDate = new Date(startDate);
-  if (endDate) filter.endDate = new Date(endDate);
-  if (category) filter.category = category;
-  
-  const expenses = await getExpenses(filter);
-  
-  res.json({
-    success: true,
-    data: expenses,
-    pagination: {
-      page,
-      limit,
-      total: expenses.length
-    }
-  });
-};
+  try {
+    const { startDate, endDate, category, limit = 10, page = 1 } = req.query;
+    
+    const filter = {};
+    
+    if (startDate) filter.startDate = new Date(startDate);
+    if (endDate) filter.endDate = new Date(endDate);
+    if (category) filter.category = category;
+    
+    const expenses = await getExpenses(filter);
+    
+    res.json({
+      success: true,
+      data: expenses,
+      pagination: {
+        page,
+        limit,
+        total: expenses.length
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch expenses'
+    });
+  }
+});
 
 // Add new expense
 router.post('/', async (req, res) => {
@@ -49,7 +59,7 @@ router.post('/', async (req, res) => {
       message: 'Failed to add expense'
     });
   }
-};
+});
 
 // Update expense
 router.put('/:id', async (req, res) => {
@@ -66,9 +76,9 @@ router.put('/:id', async (req, res) => {
     res.status(400).json({
       success: false,
       message: 'Failed to update expense'
-    }
+    });
   }
-};
+});
 
 // Delete expense
 router.delete('/:id', async (req, res) => {
@@ -82,7 +92,7 @@ router.delete('/:id', async (req, res) => {
       message: 'Failed to delete expense'
     });
   }
-};
+});
 
 // Like expense
 router.post('/:id/like', async (req, res) => {
@@ -97,8 +107,9 @@ router.post('/:id/like', async (req, res) => {
     res.status(400).json({
       success: false,
       message: 'Failed to like expense'
-    }
-  };
+    });
+  }
+});
 
 // Comment on expense
 router.post('/:id/comments', async (req, res) => {
@@ -117,7 +128,7 @@ router.post('/:id/comments', async (req, res) => {
       message: 'Failed to add comment'
     });
   }
-};
+});
 
 // Get expense comments
 router.get('/:id/comments', async (req, res) => {
@@ -134,6 +145,6 @@ router.get('/:id/comments', async (req, res) => {
       message: 'Failed to fetch comments'
     });
   }
-};
+});
 
 export default router;

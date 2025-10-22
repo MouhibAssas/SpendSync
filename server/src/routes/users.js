@@ -9,13 +9,14 @@ const router = express.Router();
 // Get all users
 router.get('/', async (req, res) => {
   try {
-    const { limit = 1, page = 1 } = req.query;
-    
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+
     const users = await User.find({})
-      .limit(limit * (page - 1))
       .skip((page - 1) * limit)
+      .limit(limit)
       .sort({ createdAt: -1 });
-    
+
     res.json({
       success: true,
       data: users,
@@ -29,19 +30,20 @@ router.get('/', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch users'
-    }
-  };
+    });
+  }
+});
 
 // Get user by ID
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findById(id);
-    
+
     if (!user) {
       return notFound(req, res);
     }
-    
+
     res.json({
       success: true,
       data: user
@@ -52,16 +54,16 @@ router.get('/:id', async (req, res) => {
       message: 'User not found'
     });
   }
-};
+});
 
 // Update user profile
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-    
-    const user = await User.findByIdAndUpdate(id, updateData);
-    
+
+    const user = await User.findByIdAndUpdate(id, updateData, { new: true });
+
     res.json({
       success: true,
       data: user
@@ -72,34 +74,40 @@ router.put('/:id', async (req, res) => {
       message: 'Failed to update user'
     });
   }
-};
+});
 
 // Delete user
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await User.findByIdAndDelete(id);
-    
+
     res.json({
       success: true,
       message: 'User deleted successfully'
     });
   } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to delete user'
-      });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete user'
+    });
   }
-};
+});
 
 // Get user statistics
 router.get('/stats', async (req, res) => {
   try {
+    // Example aggregation, adjust fields as needed
     const stats = await User.aggregate([
-      { $match: { $sum: '$amount' },
-      { $group: null }
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' },
+          avgAmount: { $avg: '$amount' }
+        }
+      }
     ]);
-    
+
     res.json({
       success: true,
       data: {
@@ -114,6 +122,6 @@ router.get('/stats', async (req, res) => {
       message: 'Failed to fetch stats'
     });
   }
-};
+});
 
 export default router;

@@ -43,9 +43,9 @@ router.post('/', async (req, res) => {
     res.status(400).json({
       success: false,
       message: 'Failed to create post'
-    }
-  </div>
-</div>
+    });
+  }
+});
 
 // Like a post
 router.post('/:id/like', async (req, res) => {
@@ -61,9 +61,9 @@ router.post('/:id/like', async (req, res) => {
     res.status(400).json({
       success: false,
       message: 'Failed to like post'
-    }
-  </div>
-</div>
+    });
+  }
+});
 
 // Comment on post
 router.post('/:id/comments', async (req, res) => {
@@ -81,5 +81,8 @@ router.post('/:id/comments', async (req, res) => {
     res.status(400).json({
       success: false,
       message: 'Failed to add comment'
-    }
-  </div>
+    });
+  }
+});
+
+export default router;

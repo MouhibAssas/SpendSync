@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { connectWithRetry, getDbUri } from './config/db.js'
 import { notFound, errorHandler } from './middleware/error.js'
 import authRouter from './routes/auth.js'
+import expensesRouter from './routes/expenses.js'
 import purchasesRouter from './routes/purchases.js'
 import usersRouter from './routes/users.js'
 import feedRouter from './routes/feed.js'
@@ -36,15 +37,18 @@ app.use(errorHandler)
 
 const PORT = process.env.PORT || 4000
 
+// Create HTTP server
+const server = http.createServer(app)
+
 // Database connection with retry logic
 connectWithRetry({ uri: getDbUri() })
-    .then(() => {
+  .then(() => {
     attachSocket(server)
-        server.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`)
+    server.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`)
     })
-})
-    .catch((err) => {
-        console.error('Mongo connection error', err)
-        process.exit(1)
-})
+  })
+  .catch((err) => {
+    console.error('Mongo connection error', err)
+    process.exit(1)
+  })

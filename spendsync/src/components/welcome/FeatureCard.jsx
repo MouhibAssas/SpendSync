@@ -15,7 +15,7 @@ function FeatureCard({ Icon, title, description }) {
 			transition={{ type: 'spring', stiffness: 300, damping: 15 }}
 		>
 			<motion.div className="w-12 h-12 bg-orange-500 bg-opacity-20 rounded-lg flex items-center justify-center mb-4" whileHover={{ rotate: 15, scale: 1.1, backgroundColor: 'rgba(251, 146, 60, 0.3)' }} transition={{ type: 'spring', stiffness: 300, damping: 10 }}>
-				<Icon className="text-orange-400 text-xl" />
+				<Icon className=" text-xl" />
 			</motion.div>
 			<h3 className="text-xl font-semibold mb-2">{title}</h3>
 			<p className="text-gray-400">{description}</p>

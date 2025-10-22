@@ -33,11 +33,8 @@ body {
   font-family: ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Base text/link contrast */
-a { color: oklch(85% 0.08 35); }
-a:hover { color: oklch(90% 0.08 35); }
-h1, h2, h3, h4, h5, h6 { color: white; }
-p, li, small { color: #cbd5e1; /* slate-300 */ }
+
+
 
 /* Strong focus styles for accessibility */
 :focus-visible {
