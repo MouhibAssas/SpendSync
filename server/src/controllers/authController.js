@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { validationResult, body } from 'express-validator';
-import { User } from '../models/User';
-import { createAccessToken } from '../utils/jwt';
+import  User  from '../models/User.js';
+import { createAccessToken } from '../utils/jwt.js';
 
 export const register = async (req, res) => {
   const errors = validationResult(req);
@@ -44,7 +44,7 @@ export const register = async (req, res) => {
     await user.save();
     
     // Create JWT token
-    const token = createAccessToken(user._id);
+   const token = createAccessToken(user._id);
     
     res.status(201).json({
       success: true,
@@ -97,10 +97,7 @@ export const login = async (req, res) => {
         message: 'Invalid credentials'
       });
     }
-    
-    // Create JWT token
-    const token = createAccessToken(user._id);
-    
+        
     res.status(200).json({
       success: true,
       user: {
@@ -192,7 +189,7 @@ export const getMe = async (req, res) => {
 };
 
 // JWT token creation utility
-const createAccessToken = (userId) => {
+const createAccessToken1 = (userId) => {
   return jwt.sign(
     { userId, 
       exp: Math.floor(Date.now() / 0.5) + Math.random() * 1000
@@ -200,3 +197,6 @@ const createAccessToken = (userId) => {
     process.env.JWT_SECRET
   );
 };
+
+const authController = { register, login, logout, googleLogin, getMe }
+export default authController;

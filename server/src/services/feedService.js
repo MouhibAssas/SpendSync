@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL } from '../utils/api';
+import api from '../utils/api.js';
 
 // Get feed posts
 export const getFeedPosts = async (filters = {}) => {

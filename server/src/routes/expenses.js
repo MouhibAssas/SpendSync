@@ -8,9 +8,9 @@ import {
   likeExpense,
   commentOnExpense,
   getExpenseComments
-} from '../services/expenseService';
-import { authMiddleware } from '../middleware/auth';
-import { notFound, errorHandler } from '../middleware/error';
+} from '../services/expenseService.js';
+import  authMiddleware  from '../middleware/auth.js';
+import { notFound, errorHandler } from '../middleware/error.js';
 
 const router = express.Router();
 
