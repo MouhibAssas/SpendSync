@@ -4,9 +4,9 @@ import {
   createPost, 
   likePost, 
   commentOnPost 
-} from '../services/feedService';
-import { authMiddleware } from '../middleware/auth';
-import { notFound, errorHandler } from '../middleware/error';
+} from '../services/feedService.js';
+import  authMiddleware  from '../middleware/auth.js';
+import { notFound, errorHandler } from '../middleware/error.js';
 
 const router = express.Router();
 
