@@ -3,10 +3,9 @@ import jwt from 'jsonwebtoken';
 // Create JWT token
 export const createAccessToken = (userId) => {
   return jwt.sign(
-    { userId, 
-      exp: Math.floor(Date.now() / 0.5) + Math.random() * 1000
-    },
-    process.env.JWT_SECRET
+    { userId },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
   );
 };
 

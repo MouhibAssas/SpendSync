@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 // Get MongoDB Atlas connection string from environment
 export const getDbUri = () => {
-  const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/spendsync';
+  const MONGO_URI = process.env.MONGO_URI ;
   return MONGO_URI;
 };
 

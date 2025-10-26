@@ -19,9 +19,5 @@ export function issueToken(res, userId) {
 	res.setHeader('x-auth-token', token)
 }
 
-<<<<<<< HEAD
-
-=======
 const authMiddleware = { requireAuth, issueToken }
 export default authMiddleware
->>>>>>> develop

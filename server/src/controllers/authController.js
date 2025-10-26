@@ -33,18 +33,16 @@ export const register = async (req, res) => {
       username,
       fullName,
       email,
-      password,
+      passwordHash: await User.hashPassword(password),
       country,
       currency,
       profilePhoto: req.body.profilePhoto || ''
     });
-    
-    // Hash password before saving
-    user.password = await bcrypt.hash(password, 10);
+
     await user.save();
     
     // Create JWT token
-   const token = createAccessToken(user._id);
+    const token = createAccessToken(user._id);
     
     res.status(201).json({
       success: true,
@@ -90,14 +88,17 @@ export const login = async (req, res) => {
     
     // Compare hashed password
     const isValid = await user.comparePassword(password);
-    
+
     if (!isValid) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
-        
+
+    // Create JWT token
+    const token = createAccessToken(user._id);
+
     res.status(200).json({
       success: true,
       user: {
@@ -150,25 +151,16 @@ export const googleLogin = async (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
-    const token = req.cookies.token;
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'No token provided'
-      });
-    }
-    
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
-    
+    // User is already authenticated by middleware, req.userId is set
+    const user = await User.findById(req.userId).select('-passwordHash');
+
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
-        message: 'Invalid token'
+        message: 'User not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       user: {
@@ -177,7 +169,9 @@ export const getMe = async (req, res) => {
         fullName: user.fullName,
         email: user.email,
         country: user.country,
-        currency: user.currency
+        currency: user.currency,
+        profilePhoto: user.profilePhoto,
+        bio: user.bio
       }
     });
   } catch (error) {
@@ -188,15 +182,7 @@ export const getMe = async (req, res) => {
   }
 };
 
-// JWT token creation utility
-const createAccessToken1 = (userId) => {
-  return jwt.sign(
-    { userId, 
-      exp: Math.floor(Date.now() / 0.5) + Math.random() * 1000
-    },
-    process.env.JWT_SECRET
-  );
-};
+// Remove unused function
 
 const authController = { register, login, logout, googleLogin, getMe }
 export default authController;

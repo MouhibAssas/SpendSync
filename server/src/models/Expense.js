@@ -11,6 +11,7 @@ const expenseSchema = new mongoose.Schema({
 	photo: { type: String },
 	location: { type: String },
 	tags: [{ type: String }],
+	likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 	createdAt: { type: Date, default: Date.now, required: true },
 	resetDate: { type: Date, required: true }
 }, { timestamps: true })

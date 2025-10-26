@@ -1,12 +1,7 @@
 import express from 'express';
 import { validationResult, body } from 'express-validator';
-<<<<<<< HEAD
-import { authController } from '../controllers/authController.js';
-import { authMiddleware } from '../middleware/auth.js';
-=======
-import  authController   from '../controllers/authController.js';
-import authMiddleware  from '../middleware/auth.js';
->>>>>>> develop
+import  authController  from '../controllers/authController.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -39,6 +34,6 @@ router.post('/google', authController.googleLogin);
 router.post('/logout', authController.logout);
 
 // Get current user
-router.get('/me', authMiddleware, authController.getMe);
+router.get('/me', requireAuth, authController.getMe);
 
 export default router;

@@ -38,44 +38,79 @@ export const addExpense = async (expenseData) => {
  * Update an existing expense
  * @param {String} id - Expense ID
  * @param {Object} updateData - Data to update
+ * @param {String} userId - User ID for ownership verification
  * @returns {Promise<Object>} Updated expense
  */
-export const updateExpense = async (id, updateData) => {
-  const expense = await Expense.findByIdAndUpdate(id, updateData, { new: true });
+export const updateExpense = async (id, updateData, userId) => {
+  const expense = await Expense.findOneAndUpdate(
+    { _id: id, userId }, // Ensure user owns the expense
+    updateData,
+    { new: true }
+  );
+  if (!expense) {
+    throw new Error('Expense not found or unauthorized');
+  }
   return expense;
 };
 
 /**
  * Delete an expense
  * @param {String} id - Expense ID
+ * @param {String} userId - User ID for ownership verification
  * @returns {Promise<void>}
  */
-export const deleteExpense = async (id) => {
-  await Expense.findByIdAndDelete(id);
+export const deleteExpense = async (id, userId) => {
+  const expense = await Expense.findOneAndDelete({ _id: id, userId });
+  if (!expense) {
+    throw new Error('Expense not found or unauthorized');
+  }
 };
 
 /**
  * Like an expense (toggle like functionality)
  * @param {String} id - Expense ID
+ * @param {String} userId - User ID who is liking
  * @returns {Promise<Object>} Updated expense
  */
-export const likeExpense = async (id) => {
-  // TODO: Implement like functionality with user tracking
-  // For now, just return the expense
+export const likeExpense = async (id, userId) => {
   const expense = await Expense.findById(id);
+  if (!expense) {
+    throw new Error('Expense not found');
+  }
+
+  // Check if user already liked this expense
+  const likeIndex = expense.likes ? expense.likes.indexOf(userId) : -1;
+
+  if (likeIndex > -1) {
+    // User already liked, so unlike
+    expense.likes.splice(likeIndex, 1);
+  } else {
+    // User hasn't liked, so add like
+    if (!expense.likes) expense.likes = [];
+    expense.likes.push(userId);
+  }
+
+  await expense.save();
   return expense;
 };
 
 /**
  * Add a comment to an expense
  * @param {String} id - Expense ID
- * @param {Object} commentData - Comment data containing text
+ * @param {Object} commentData - Comment data containing text and userId
  * @returns {Promise<Object>} Created comment
  */
 export const commentOnExpense = async (id, commentData) => {
+  // First verify the expense exists
+  const expense = await Expense.findById(id);
+  if (!expense) {
+    throw new Error('Expense not found');
+  }
+
   const comment = new Comment({
-    feedId: id,
-    ...commentData
+    feedId: id, // This should reference the expense ID for comments on expenses
+    userId: commentData.userId,
+    text: commentData.text
   });
   await comment.save();
   return comment;
