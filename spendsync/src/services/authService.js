@@ -21,8 +21,12 @@ export async function loginWithEmail(email, password) {
 	return res.data.user
 }
 
-export async function registerWithEmail(payload) {
-	const res = await api.post('/auth/register', payload)
+export async function registerWithEmail({ email, password, fullName, username, country, currency }) {
+	const res = await api.post('/auth/register', { email, password, fullName, username, country, currency }, {
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	})
 	applyTokenFromResponse(res)
 	return res.data.user
 }

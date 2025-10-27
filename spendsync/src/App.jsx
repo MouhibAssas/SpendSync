@@ -18,12 +18,12 @@ return (
 <AuthProvider>
 <div className="min-h-screen bg-gray-900 text-white">
 <Routes>
-<Route path="/" element={<WelcomePage />} />
-<Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
-<Route path="/signup" element={<AuthLayout><SignUp /></AuthLayout>} />
-<Route path="/dashboard" element={<DashboardLayout />} />
-<Route path="/feed" element={<Feed /> }/>
-<Route path="/profile" element={<Profile />} />
+<Route path="/" element={<PublicOnly><WelcomePage /></PublicOnly>} />
+<Route path="/login" element={<PublicOnly><AuthLayout><Login /></AuthLayout></PublicOnly>} />
+<Route path="/signup" element={<PublicOnly><AuthLayout><SignUp /></AuthLayout></PublicOnly>} />
+<Route path="/dashboard" element={<Protected><DashboardLayout /></Protected>} />
+<Route path="/feed" element={<Protected><Feed /></Protected>} />
+<Route path="/profile" element={<Protected><Profile /></Protected>} />
 <Route path="*" element={<Navigate to="/" replace />} />
 </Routes>
 </div>
@@ -35,10 +35,17 @@ return (
 export default App;
 
 function Protected({ children }) {
-const { user, loading } = useAuth()
-if (loading) return null
-if (!user) return <Navigate to="/login" replace />
-return children
+	const { user, loading } = useAuth()
+	if (loading) return null
+	if (!user) return <Navigate to="/login" replace />
+	return children
+}
+
+function PublicOnly({ children }) {
+	const { user, loading } = useAuth()
+	if (loading) return null
+	if (user) return <Navigate to="/dashboard" replace />
+	return children
 }
 
 function AuthLayout({ children }) {

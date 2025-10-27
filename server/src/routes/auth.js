@@ -3,6 +3,8 @@ import { validationResult, body } from 'express-validator';
 import  authController  from '../controllers/authController.js';
 import { requireAuth } from '../middleware/auth.js';
 
+
+
 const router = express.Router();
 
 // Register new user
@@ -12,9 +14,9 @@ router.post('/register', [
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
   body('fullName').notEmpty().withMessage('Full name is required'),
   body('country').notEmpty().withMessage('Country is required'),
-  body('currency').optional().isIn(['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CNY', 'INR', 'TND']),
+  body('currency').optional().isIn(['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CNY', 'INR', 'TND']).withMessage('Invalid currency'),
   body('profilePhoto').optional()
-], 
+],
   authController.register
 );
 

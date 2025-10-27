@@ -1,15 +1,19 @@
 // src/pages/Dashboard.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaDollarSign, FaCalendarAlt, FaChartBar, FaShare } from 'react-icons/fa'; // Added FaShare
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
-  const [todaySpending, setTodaySpending] = useState(142.5);
-  const [thisWeekSpending, setThisWeekSpending] = useState(687.2);
-  const [thisMonthSpending, setThisMonthSpending] = useState(2341.8);
+  const { user } = useAuth();
+  const [todaySpending, setTodaySpending] = useState(0);
+  const [thisWeekSpending, setThisWeekSpending] = useState(0);
+  const [thisMonthSpending, setThisMonthSpending] = useState(0);
+  const [expenses, setExpenses] = useState([]);
 
   const [filter, setFilter] = useState('today');
 
-  const expenses = [
+  // Sample expenses for now - will be replaced with API data
+  const sampleExpenses = [
     {
       id: 1,
       title: 'Lunch at Restaurant',
@@ -39,15 +43,48 @@ const Dashboard = () => {
     }
   ];
 
+  useEffect(() => {
+    // Load user-specific dashboard data
+    const loadDashboardData = async () => {
+      try {
+        // TODO: Fetch real data from API based on user
+        // For now, use sample data but make it user-specific
+        const userSpecificExpenses = sampleExpenses.map(expense => ({
+          ...expense,
+          // Could add user-specific modifications here
+        }));
+
+        setExpenses(userSpecificExpenses);
+        setTodaySpending(142.5);
+        setThisWeekSpending(687.2);
+        setThisMonthSpending(2341.8);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    };
+
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
+
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
   };
 
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-   
 
       <main className="container mx-auto px-6 py-8 md:px-8 lg:px-10">
+        {/* Welcome Message */}
+        {user && (
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Welcome back, {user.fullName}!</h1>
+            <p className="text-gray-400">Here's your spending overview for today.</p>
+          </div>
+        )}
+
         {/* Spending Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Today - keep yellow */}
@@ -107,7 +144,9 @@ const Dashboard = () => {
         </div>
 
         {/* Expenses List */}
-        <h2 className="text-2xl font-bold mb-6">Today's Expenses</h2>
+        <h2 className="text-2xl font-bold mb-6">
+          {user ? `${user.fullName}'s Expenses` : 'Today\'s Expenses'}
+        </h2>
         <div className="space-y-4">
           {expenses.map((expense) => (
             <div 

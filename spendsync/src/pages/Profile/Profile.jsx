@@ -1,18 +1,33 @@
 // src/pages/Profile.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaEdit } from 'react-icons/fa';
-import AuthNavbar from '../../components/navbar/AuthNavbar';
+import { useAuth } from '../../context/AuthContext';
 
 const Profile = () => {
-  const [profile] = useState({
-    username: '@your_username',
-    bio: 'Expense Tracking Enthusiast',
-    tagline: 'Love sharing my spending journey and helping friends stay financially mindful! 💰',
-    expensesShared: 156,
-    friends: 89,
-    memberSince: 'Jan 2024',
-    avatar: '/avatars/user.jpg'
+  const { user } = useAuth();
+  const [profile, setProfile] = useState({
+    username: '',
+    bio: '',
+    tagline: '',
+    expensesShared: 0,
+    friends: 0,
+    memberSince: '',
+    avatar: ''
   });
+
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        username: `@${user.username}`,
+        bio: user.bio || 'Expense Tracking Enthusiast',
+        tagline: `Love sharing my spending journey and helping friends stay financially mindful! 💰`,
+        expensesShared: 0, // TODO: Fetch from API
+        friends: user.friends?.length || 0, // Use actual friends count
+        memberSince: new Date(user.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        avatar: user.profilePhoto ? `http://localhost:4000${user.profilePhoto}` : '/avatars/user.jpg'
+      });
+    }
+  }, [user]);
 
   const sharedExpenses = [
     {
@@ -39,10 +54,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <AuthNavbar 
-        onAddExpense={() => alert('Add Expense clicked')} 
-        userProfileImage={profile.avatar} 
-      />
 
       <main className="container mx-auto px-6 py-8 md:px-8 lg:px-10">
         {/* Profile Header - with light gray border */}
@@ -76,7 +87,9 @@ const Profile = () => {
 
         {/* "Your Shared Expenses" Section - with light gray border */}
         <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg mb-8">
-          <h2 className="text-xl font-bold mb-4">Your Shared Expenses</h2>
+          <h2 className="text-xl font-bold mb-4">
+            {user ? `${user.fullName}'s Shared Expenses` : 'Your Shared Expenses'}
+          </h2>
           
           <div className="space-y-4">
             {sharedExpenses.map((expense) => (

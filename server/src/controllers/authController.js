@@ -7,13 +7,22 @@ import { createAccessToken } from '../utils/jwt.js';
 export const register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
     return res.status(400).json({
       success: false,
       errors: errors.array()
     });
   }
-  
+
   const { username, fullName, email, password, country, currency } = req.body;
+
+  // Additional validation for required fields
+  if (!username || !fullName || !email || !password || !country) {
+    return res.status(400).json({
+      success: false,
+      message: 'All required fields must be provided'
+    });
+  }
   
   try {
     // Check if user already exists

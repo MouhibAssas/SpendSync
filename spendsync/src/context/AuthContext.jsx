@@ -14,9 +14,9 @@ export function AuthProvider({ children }) {
 			try {
 				const me = await getCurrentUser()
 				setUser(me)
-			} catch {}
+			} catch {
 			setLoading(false)
-		})()
+	}})()
 	}, [])
 
 	async function login(email, password) {
@@ -25,8 +25,8 @@ export function AuthProvider({ children }) {
 		return me
 	}
 
-	async function signup(email, password, name) {
-		const me = await registerWithEmail({ email, password, name })
+	async function signup(email, password, fullName, username, country, currency) {
+		const me = await registerWithEmail({ email, password, fullName, username, country, currency })
 		setUser(me)
 		return me
 	}

@@ -263,13 +263,12 @@ function SignUp() {
     setLoading(true)
     try {
       await signup(
-        formData.email, 
-        formData.password, 
+        formData.email,
+        formData.password,
         formData.fullName,
         formData.username,
         formData.country,
-        formData.currency,
-        profilePhoto
+        formData.currency
       )
       setSuccessMessage('Account created successfully! Redirecting...')
       toast.success('Account created')

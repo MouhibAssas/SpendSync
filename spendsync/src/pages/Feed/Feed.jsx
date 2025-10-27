@@ -1,7 +1,6 @@
 // src/pages/Feed.jsx
 import React, { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
-import AuthNavbar from '../../components/navbar/AuthNavbar';
 
 const Feed = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +40,6 @@ const Feed = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <AuthNavbar onAddExpense={() => alert('Add Expense clicked')} userProfileImage="/default-profile.jpg" />
 
       <main className="container mx-auto px-4 py-6 md:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6">
