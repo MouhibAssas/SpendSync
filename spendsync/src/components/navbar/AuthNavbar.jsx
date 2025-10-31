@@ -85,13 +85,14 @@ const AuthNavbar = ({ onAddExpense }) => {
         <button
           onClick={() => handleNavClick('/profile')}
           className={`flex items-center space-x-1 font-medium transition-colors ${
-            isActive('/profile') 
-              ? 'text-orange-400' 
+            isActive('/profile')
+              ? 'text-orange-400'
               : 'text-white hover:text-orange-400'
           }`}
         >
           <FaUser /> <span>Profile</span>
         </button>
+        
       </div>
 
       {/* Right Section: Add Expense Button & Profile */}

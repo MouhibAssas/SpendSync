@@ -77,8 +77,10 @@ function Login() {
                 navigate('/dashboard')
             }, 1000)
         } catch (err) {
-            setError('Invalid credentials. Please check your email/username and password.')
-            toast.error('Login failed')
+            // Handle specific backend error messages
+            const errorMessage = err.response?.data?.message || err.message || 'Invalid credentials. Please check your email/username and password.'
+            setError(errorMessage)
+            toast.error(errorMessage)
         } finally {
             setLoading(false)
         }

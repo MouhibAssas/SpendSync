@@ -10,6 +10,7 @@ import Navbar from "./components/welcome/Navbar";
 import Footer from "./components/welcome/Footer";
 import Feed from "./pages/Feed/Feed";
 import Profile from "./pages/Profile/Profile";
+import Settings from "./pages/Settings";
 
 
 function App() {
@@ -22,8 +23,9 @@ return (
 <Route path="/login" element={<PublicOnly><AuthLayout><Login /></AuthLayout></PublicOnly>} />
 <Route path="/signup" element={<PublicOnly><AuthLayout><SignUp /></AuthLayout></PublicOnly>} />
 <Route path="/dashboard" element={<Protected><DashboardLayout /></Protected>} />
-<Route path="/feed" element={<Protected><Feed /></Protected>} />
-<Route path="/profile" element={<Protected><Profile /></Protected>} />
+<Route path="/feed" element={<Protected><FeedLayout /></Protected>} />
+<Route path="/profile" element={<Protected><ProfileLayout /></Protected>} />
+<Route path="/settings" element={<Protected><SettingsLayout /></Protected>} />
 <Route path="*" element={<Navigate to="/" replace />} />
 </Routes>
 </div>
@@ -63,11 +65,53 @@ return (
 function DashboardLayout() {
 return (
 <div className="min-h-screen bg-gray-900 text-white flex flex-col">
-<AuthNavbar />
+<AuthNavbar onAddExpense={() => {
+  // This will be handled by the Dashboard component
+  const dashboardElement = document.querySelector('[data-dashboard]');
+  if (dashboardElement) {
+    dashboardElement.dispatchEvent(new CustomEvent('addExpense'));
+  }
+}} />
 <main className="flex-grow">
 <Dashboard />
 </main>
 <Footer />
 </div>
 )
-} 
+}
+
+function FeedLayout() {
+return (
+<div className="min-h-screen bg-gray-900 text-white flex flex-col">
+<AuthNavbar />
+<main className="flex-grow">
+<Feed />
+</main>
+<Footer />
+</div>
+)
+}
+
+function ProfileLayout() {
+return (
+<div className="min-h-screen bg-gray-900 text-white flex flex-col">
+<AuthNavbar />
+<main className="flex-grow">
+<Profile />
+</main>
+<Footer />
+</div>
+)
+}
+
+function SettingsLayout() {
+return (
+<div className="min-h-screen bg-gray-900 text-white flex flex-col">
+<AuthNavbar />
+<main className="flex-grow">
+<Settings />
+</main>
+<Footer />
+</div>
+)
+}

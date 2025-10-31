@@ -5,73 +5,74 @@ import  User  from '../models/User.js';
 import { createAccessToken } from '../utils/jwt.js';
 
 export const register = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log('Validation errors:', errors.array());
-    return res.status(400).json({
-      success: false,
-      errors: errors.array()
-    });
-  }
+   const errors = validationResult(req);
+   if (!errors.isEmpty()) {
+     console.log('Validation errors:', errors.array());
+     return res.status(400).json({
+       success: false,
+       errors: errors.array()
+     });
+   }
 
-  const { username, fullName, email, password, country, currency } = req.body;
+   const { username, fullName, email, password, country, currency } = req.body;
 
-  // Additional validation for required fields
-  if (!username || !fullName || !email || !password || !country) {
-    return res.status(400).json({
-      success: false,
-      message: 'All required fields must be provided'
-    });
-  }
-  
-  try {
-    // Check if user already exists
-    const existingUser = await User.findOne({ 
-      $or: [{ username }, { email }]
-    });
-    
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists'
-      });
-    }
-    
-    // Create new user
-    const user = new User({
-      username,
-      fullName,
-      email,
-      passwordHash: await User.hashPassword(password),
-      country,
-      currency,
-      profilePhoto: req.body.profilePhoto || ''
-    });
+   // Additional validation for required fields
+   if (!username || !fullName || !email || !password || !country) {
+     return res.status(400).json({
+       success: false,
+       message: 'All required fields must be provided'
+     });
+   }
 
-    await user.save();
-    
-    // Create JWT token
-    const token = createAccessToken(user._id);
-    
-    res.status(201).json({
-      success: true,
-      user: {
-        id: user._id,
-        username: user.username,
-        fullName: user.fullName,
-        email: user.email,
-        country: user.country,
-        currency: user.currency
-      },
-      token
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Registration failed'
-    });
-  }
-};
+   try {
+     // Check if user already exists
+     const existingUser = await User.findOne({
+       $or: [{ username }, { email }]
+     });
+
+     if (existingUser) {
+       const field = existingUser.email === email ? 'Email' : 'Username';
+       return res.status(400).json({
+         success: false,
+         message: `${field} already exists`
+       });
+     }
+
+     // Create new user
+     const user = new User({
+       username,
+       fullName,
+       email,
+       passwordHash: await User.hashPassword(password),
+       country,
+       currency,
+       profilePhoto: req.body.profilePhoto || ''
+     });
+
+     await user.save();
+
+     // Create JWT token
+     const token = createAccessToken(user._id);
+
+     res.status(201).json({
+       success: true,
+       user: {
+         id: user._id,
+         username: user.username,
+         fullName: user.fullName,
+         email: user.email,
+         country: user.country,
+         currency: user.currency
+       },
+       token
+     });
+   } catch (error) {
+     res.status(500).json({
+       success: false,
+       message: 'Registration failed'
+     });
+   }
+ };
 
 export const login = async (req, res) => {
   const errors = validationResult(req);

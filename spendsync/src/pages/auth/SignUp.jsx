@@ -276,8 +276,10 @@ function SignUp() {
         navigate('/dashboard')
       }, 2000)
     } catch (err) {
-      setError(err.message || 'Sign up failed. Please try again.')
-      toast.error('Sign up failed')
+      // Handle specific backend error messages
+      const errorMessage = err.response?.data?.message || err.message || 'Sign up failed. Please try again.'
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
