@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv';
+dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
+const JWT_SECRET = process.env.JWT_SECRET 
 
 export function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization || req.headers.Authorization
@@ -20,6 +22,7 @@ export function requireAuth(req, res, next) {
 export function issueToken(res, userId) {
   const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' })
   res.setHeader('authorization', `Bearer ${token}`)
+  return token;
 }
 
 const authMiddleware = { requireAuth, issueToken }

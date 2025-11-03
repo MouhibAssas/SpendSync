@@ -57,16 +57,23 @@ const Dashboard = () => {
   useEffect(() => {
     // Listen for add expense event from navbar
     const handleAddExpenseEvent = () => {
+      console.log('📱 Add Expense button clicked - opening modal');
       setShowAddExpense(true);
     };
 
     const dashboardElement = document.querySelector('[data-dashboard]');
+    console.log('🎯 Dashboard element found:', dashboardElement);
+
     if (dashboardElement) {
+      console.log('✅ Adding event listener for addExpense');
       dashboardElement.addEventListener('addExpense', handleAddExpenseEvent);
+    } else {
+      console.warn('❌ Dashboard element not found for event listener');
     }
 
     return () => {
       if (dashboardElement) {
+        console.log('🧹 Removing event listener for addExpense');
         dashboardElement.removeEventListener('addExpense', handleAddExpenseEvent);
       }
     };
@@ -121,10 +128,11 @@ const Dashboard = () => {
         setError('Failed to load expenses. Please try again.');
         setLoading(false);
         
-        // If it's an authentication error, redirect to login
+        // If it's an authentication error, redirect to login - TEMPORARILY DISABLED FOR TESTING
         if (error.response?.status === 401) {
-          logout();
-          navigate('/login');
+          // logout();
+          // navigate('/login');
+          console.log('401 error in Dashboard - redirect disabled for testing')
         }
       }
     };

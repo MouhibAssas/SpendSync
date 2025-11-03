@@ -4,6 +4,14 @@ import toast from 'react-hot-toast'
 const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api' })
 const TOKEN_KEY = 'auth_token'
 
+// 🔹 Restore token immediately when this file is loaded
+if (typeof window !== 'undefined') {
+  const token = localStorage.getItem(TOKEN_KEY)
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    console.log('✅ Token restored at startup:', token)
+  }
+}
 // attach token
 api.interceptors.request.use((config) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null
@@ -23,10 +31,11 @@ api.interceptors.response.use(
       return api(config)
     }
     
-    // Handle 401 errors
+    // Handle 401 errors - TEMPORARILY DISABLED FOR TESTING
     if (error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_KEY)
-      window.location.href = '/login'
+      // localStorage.removeItem(TOKEN_KEY)
+      // window.location.href = '/login'
+      console.log('401 error detected - redirect disabled for testing')
     }
     
     const message = error.response?.data?.error || 'Request failed'

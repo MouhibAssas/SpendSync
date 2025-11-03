@@ -1,8 +1,5 @@
-import axios from 'axios'
+import api from './api'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
-})
 const TOKEN_KEY = 'auth_token'
 
 // SSR-safe token management
@@ -30,6 +27,14 @@ export const setToken = (token) => {
   }
 }
 
+// 🔹 Restore token immediately when this file loads
+const token = getToken()
+if (token) {
+  api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  console.log('✅ Token restored from localStorage')
+}
+
+
 export const removeToken = () => {
   if (!isClient) return
 
@@ -42,15 +47,7 @@ export const removeToken = () => {
 }
 
 // Initialize token from localStorage on app startup
-const initializeAuth = () => {
-  const token = getToken()
-  if (token) {
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`
-  }
-}
 
-// Call initialization
-initializeAuth()
 
 // Request interceptor to ensure token is always attached to requests
 api.interceptors.request.use(
@@ -72,12 +69,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token is invalid/expired, remove it
-      removeToken()
-      // Redirect to login page
-      if (isClient) {
-        window.location.href = '/login'
-      }
+      // Token is invalid/expired, remove it - TEMPORARILY DISABLED FOR TESTING
+      // removeToken()
+      // Redirect to login page - TEMPORARILY DISABLED FOR TESTING
+      // if (isClient) {
+      //   window.location.href = '/login'
+      // }
+      console.log('401 error in authService - redirect disabled for testing')
     }
     return Promise.reject(error)
   }
@@ -90,10 +88,13 @@ export async function loginWithEmail(email, password) {
 
     if (token) {
       setToken(token)
+      console.log('💾 Token saved to localStorage:', token)
+
     }
 
-    return user
-  } catch (error) {
+    return { user , token } 
+  } 
+  catch (error) {
     // Don't save token on login failure
     throw error
   }

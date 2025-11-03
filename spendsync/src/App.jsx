@@ -4,6 +4,7 @@ import WelcomePage from "./pages/Test/WelcomePage";
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
 import Dashboard from "./pages/Dashboard";
+import TestToken from "./pages/TestToken";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AuthNavbar from "./components/navbar/AuthNavbar";
 import Navbar from "./components/welcome/Navbar";
@@ -15,6 +16,7 @@ import Settings from "./pages/Settings";
 
 function App() {
 return (
+	
 <BrowserRouter>
 <AuthProvider>
 <div className="min-h-screen bg-gray-900 text-white">
@@ -22,6 +24,7 @@ return (
 <Route path="/" element={<PublicOnly><WelcomePage /></PublicOnly>} />
 <Route path="/login" element={<PublicOnly><AuthLayout><Login /></AuthLayout></PublicOnly>} />
 <Route path="/signup" element={<PublicOnly><AuthLayout><SignUp /></AuthLayout></PublicOnly>} />
+<Route path="/test-token" element={<TestToken />} />
 <Route path="/dashboard" element={<Protected><DashboardLayout /></Protected>} />
 <Route path="/feed" element={<Protected><FeedLayout /></Protected>} />
 <Route path="/profile" element={<Protected><ProfileLayout /></Protected>} />
@@ -31,6 +34,8 @@ return (
 </div>
 </AuthProvider>
 </BrowserRouter>
+
+
 );
 }
 
@@ -63,21 +68,26 @@ return (
 }
 
 function DashboardLayout() {
-return (
-<div className="min-h-screen bg-gray-900 text-white flex flex-col">
-<AuthNavbar onAddExpense={() => {
-  // This will be handled by the Dashboard component
-  const dashboardElement = document.querySelector('[data-dashboard]');
-  if (dashboardElement) {
-    dashboardElement.dispatchEvent(new CustomEvent('addExpense'));
-  }
-}} />
-<main className="flex-grow">
-<Dashboard />
-</main>
-<Footer />
-</div>
-)
+ return (
+ <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+ <AuthNavbar onAddExpense={() => {
+   console.log('🔘 Add Expense button clicked in navbar');
+   // This will be handled by the Dashboard component
+   const dashboardElement = document.querySelector('[data-dashboard]');
+   console.log('🎯 Dispatching addExpense event to:', dashboardElement);
+   if (dashboardElement) {
+     dashboardElement.dispatchEvent(new CustomEvent('addExpense'));
+     console.log('✅ Custom event dispatched');
+   } else {
+     console.error('❌ Dashboard element not found for event dispatch');
+   }
+ }} />
+ <main className="flex-grow">
+ <Dashboard />
+ </main>
+ <Footer />
+ </div>
+ )
 }
 
 function FeedLayout() {

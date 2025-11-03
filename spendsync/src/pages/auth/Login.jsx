@@ -70,12 +70,13 @@ function Login() {
         
         setLoading(true)
         try {
-            await login(identifier, password)
+            const res = await login(identifier, password)
+            // localStorage.setItem('auth_token', res?.data?.token || res?.token)
+
             setSuccessMessage('Login successful! Redirecting...')
             toast.success('Logged in successfully')
-            setTimeout(() => {
-                navigate('/dashboard')
-            }, 1000)
+            navigate('/dashboard')
+            
         } catch (err) {
             // Handle specific backend error messages
             const errorMessage = err.response?.data?.message || err.message || 'Invalid credentials. Please check your email/username and password.'
@@ -93,9 +94,7 @@ function Login() {
             await googleLogin()
             setSuccessMessage('Login successful! Redirecting...')
             toast.success('Logged in with Google')
-            setTimeout(() => {
-                navigate('/dashboard')
-            }, 1000)
+            navigate('/dashboard')
         } catch (err) {
             setError('Google sign-in failed. Please try again.')
             toast.error('Google sign-in failed')

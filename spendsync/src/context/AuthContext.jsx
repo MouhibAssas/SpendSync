@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loginWithEmail, registerWithEmail, loginWithGoogle, logout as apiLogout, getCurrentUser, getToken } from '../services/authService'
-
+import api from '../services/api'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
@@ -28,6 +28,8 @@ export function AuthProvider({ children }) {
         // Only try to get current user if we have a token
         const token = getToken()
         if (token) {
+          api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+
           const me = await getCurrentUser()
           if (isMounted) {
             setUser(me)
@@ -35,6 +37,7 @@ export function AuthProvider({ children }) {
         }
       } catch (error) {
         console.error('Auth initialization error:', error)
+        
         // Don't throw error, just continue without user
       } finally {
         if (isMounted) {
@@ -53,16 +56,23 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  async function login(email, password) {
-    try {
-      const me = await loginWithEmail(email, password)
-      setUser(me)
-      return me
-    } catch (error) {
-      console.error('Login error:', error)
-      throw error
-    }
+async function login(email, password) {
+  try {
+    const {user,token} = await loginWithEmail(email, password)
+    // const data = res?.data || res  // in case loginWithEmail returns axios response
+    //  await new Promise(r => setTimeout(r, 200))
+
+    console.log('💾 Token in localStorage:', localStorage.getItem('auth_token'))
+    setUser(user)
+    setTimeout(() => {
+      navigate('/dashboard')  // ✅ React Router navigation
+    }, 800)
+    // return data // return both user and token
+  } catch (error) {
+    console.error('Login error:', error)
+    throw error
   }
+}
 
   async function signup(email, password, fullName, username, country, currency) {
     try {
@@ -93,7 +103,8 @@ export function AuthProvider({ children }) {
       console.error('Logout error:', error)
     } finally {
       setUser(null)
-      navigate('/login')
+      // navigate('/login') - TEMPORARILY DISABLED FOR TESTING
+      console.log('Logout redirect disabled for testing')
     }
   }
 

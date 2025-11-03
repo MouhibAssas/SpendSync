@@ -123,10 +123,21 @@ const Profile = () => {
 
   const handleSaveProfile = async () => {
     try {
+      console.log('🔍 Starting profile update...');
+      console.log('User ID:', user._id);
+      console.log('Update data:', {
+        fullName: editForm.fullName,
+        username: editForm.username,
+        bio: editForm.bio,
+        profilePhoto: editForm.profilePhoto
+      });
+
       let profilePhotoUrl = editForm.profilePhoto;
 
       if (selectedFile) {
+        console.log('📸 Uploading image...');
         profilePhotoUrl = await uploadImage();
+        console.log('✅ Image uploaded:', profilePhotoUrl);
       }
 
       const updateData = {
@@ -136,14 +147,31 @@ const Profile = () => {
         profilePhoto: profilePhotoUrl
       };
 
-      await api.put(`/users/${user._id}`, updateData);
+      console.log('📡 Making API request to:', `/users/${user._id}`);
+      console.log('📡 Request data:', updateData);
+
+      const response = await api.put(`/users/${user._id}`, updateData);
+      console.log('✅ Profile update successful:', response.data);
 
       setShowEditModal(false);
       // Refresh the page to update user data
       window.location.reload();
     } catch (error) {
-      console.error('Failed to update profile:', error);
-      alert('Failed to update profile. Please try again.');
+      console.error('❌ Failed to update profile:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
+      console.error('❌ Error headers:', error.response?.headers);
+
+      // More specific error messages
+      if (error.response?.status === 401) {
+        alert('Authentication failed. Please log in again.');
+      } else if (error.response?.status === 403) {
+        alert('You can only update your own profile.');
+      } else if (error.response?.status === 400) {
+        alert(`Invalid data: ${error.response.data?.message || 'Please check your input.'}`);
+      } else {
+        alert(`Failed to update profile: ${error.response?.data?.message || error.message || 'Please try again.'}`);
+      }
     }
   };
 
